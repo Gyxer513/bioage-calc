@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Биологический возраст — калькулятор Горелкина-Пинхасова</title>
+<meta name="description" content="Онлайн-калькулятор биологического возраста и скорости старения по антропометрии (метод Горелкина-Пинхасова).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#eef2ff; --bg2:#f8fafc; --ink:#0f172a; --muted:#64748b;
+    --card:#ffffff; --line:#e7eaf0; --accent:#6366f1; --accent2:#8b5cf6;
+    --green:#16a34a; --greenbg:#ecfdf5; --blue:#2563eb; --bluebg:#eff6ff;
+    --red:#dc2626; --redbg:#fef2f2; --shadow:0 20px 45px -18px rgba(30,41,59,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--ink); min-height:100vh; padding:32px 16px;
+    background:
+      radial-gradient(1100px 520px at 12% -8%, #e0e7ff 0%, transparent 55%),
+      radial-gradient(900px 500px at 110% 0%, #f3e8ff 0%, transparent 50%),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:560px;margin:0 auto}
+  .head{text-align:center;margin-bottom:22px}
+  .badge{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--accent);background:#eef2ff;
+    padding:5px 12px;border-radius:999px;margin-bottom:12px}
+  h1{font-size:26px;line-height:1.2;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;
+    padding:22px;box-shadow:var(--shadow)}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f1f5f9;
+    border-radius:14px;padding:5px;margin-bottom:18px}
+  .seg button{border:0;background:transparent;padding:11px;border-radius:10px;
+    font:inherit;font-weight:600;color:var(--muted);cursor:pointer;transition:.18s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(15,23,42,.10)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1 / -1}
+  label{font-size:13px;font-weight:600;color:#475569}
+  .inp{position:relative}
+  .inp input{width:100%;padding:13px 44px 13px 14px;border:1.5px solid var(--line);
+    border-radius:12px;font:inherit;font-size:16px;color:var(--ink);background:#fff;
+    transition:.15s;outline:none;-moz-appearance:textfield}
+  .inp input::-webkit-outer-spin-button,.inp input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .inp input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(99,102,241,.14)}
+  .unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);
+    color:#94a3b8;font-size:13px;font-weight:500;pointer-events:none}
+  .result{margin-top:20px;border-radius:18px;padding:20px;border:1.5px solid var(--line);
+    background:#fff;text-align:center;opacity:0;transform:translateY(8px);
+    transition:.3s;}
+  .result.show{opacity:1;transform:none}
+  .zone{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;
+    padding:6px 13px;border-radius:999px;margin-bottom:12px}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .bv{font-size:52px;font-weight:800;line-height:1;letter-spacing:-.03em;margin:2px 0 2px}
+  .bv small{font-size:18px;font-weight:600;color:var(--muted)}
+  .delta{font-size:15px;font-weight:600;margin:6px 0 14px}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+  .metric{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:11px}
+  .metric .k{font-size:12px;color:var(--muted);font-weight:600}
+  .metric .v{font-size:19px;font-weight:700;margin-top:2px}
+  .err{color:var(--red);font-size:14px;font-weight:600}
+  details{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ ";color:var(--accent)}
+  details[open] summary::before{content:"▾ "}
+  .formula{font-size:13px;color:#475569;line-height:1.7;margin-top:10px}
+  .formula code{background:#f1f5f9;padding:2px 6px;border-radius:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+  .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:18px;line-height:1.6}
+  .foot a{color:var(--accent);text-decoration:none}
+  @media (max-width:420px){ .bv{font-size:44px} h1{font-size:22px} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <span class="badge">Метод Горелкина–Пинхасова</span>
+      <h1>Биологический возраст</h1>
+      <p class="sub">Оценка по антропометрии — считается прямо в браузере, ничего не отправляется на сервер.</p>
+    </div>
+
+    <div class="card">
+      <div class="seg" id="sex">
+        <button type="button" data-sex="m" class="on">♂ Мужчина</button>
+        <button type="button" data-sex="f">♀ Женщина</button>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="age">Возраст</label>
+          <div class="inp"><input id="age" type="number" inputmode="numeric" min="18" max="120" placeholder="40"><span class="unit">лет</span></div>
+        </div>
+        <div class="field">
+          <label for="h">Рост</label>
+          <div class="inp"><input id="h" type="number" inputmode="decimal" min="120" max="230" placeholder="180"><span class="unit">см</span></div>
+        </div>
+        <div class="field">
+          <label for="w">Вес</label>
+          <div class="inp"><input id="w" type="number" inputmode="decimal" min="30" max="250" placeholder="80"><span class="unit">кг</span></div>
+        </div>
+        <div class="field">
+          <label for="waist">Талия (ОТ)</label>
+          <div class="inp"><input id="waist" type="number" inputmode="decimal" min="40" max="200" placeholder="90"><span class="unit">см</span></div>
+        </div>
+        <div class="field full">
+          <label for="hip">Бёдра (ОБ)</label>
+          <div class="inp"><input id="hip" type="number" inputmode="decimal" min="50" max="220" placeholder="100"><span class="unit">см</span></div>
+        </div>
+      </div>
+
+      <div class="result" id="result"></div>
+
+      <details>
+        <summary>Формула и интерпретация</summary>
+        <div class="formula">
+          <p><b>РЛ</b> = возраст − 21 (муж) / − 18 (жен).<br>
+          <b>КСС</b> = (ОТ × Вес) / (ОБ × Рост<sup>2</sup> × F), где Рост в метрах.<br>
+          F<sub>муж</sub> = <code>17.2 + 0.31·РЛ + 0.0012·РЛ²</code><br>
+          F<sub>жен</sub> = <code>14.7 + 0.26·РЛ + 0.001·РЛ²</code><br>
+          <b>БВ</b> = КСС × РЛ + 21 (муж) / + 18 (жен).</p>
+          <p><b>Скорость старения (КСС):</b> &lt;0.95 — замедленная · 0.95–1.05 — норма · &gt;1.05 — ускоренная.</p>
+        </div>
+      </details>
+    </div>
+
+    <p class="foot">
+      Оценочный инструмент, не заменяет врача.<br>
+      Метод: патент РФ № 2387374 (Горелкин А.Г., Пинхасов Б.Б.).
+    </p>
+  </div>
+
+<script>
+(function(){
+  var sex = "m";
+  var $ = function(id){ return document.getElementById(id); };
+  var ids = ["age","h","w","waist","hip"];
+
+  document.querySelectorAll("#sex button").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("#sex button").forEach(function(x){x.classList.remove("on");});
+      b.classList.add("on"); sex = b.dataset.sex; calc();
+    });
+  });
+  ids.forEach(function(id){ $(id).addEventListener("input", calc); });
+
+  function calc(){
+    var res = $("result");
+    var age = parseFloat($("age").value),
+        h   = parseFloat($("h").value),
+        w   = parseFloat($("w").value),
+        ot  = parseFloat($("waist").value),
+        ob  = parseFloat($("hip").value);
+
+    if([age,h,w,ot,ob].some(function(v){return isNaN(v);})){
+      res.className = "result"; res.innerHTML = ""; return;
+    }
+    if(h<=0||w<=0||ot<=0||ob<=0){
+      res.className="result show"; res.innerHTML='<div class="err">Проверьте значения — нужны положительные числа.</div>'; return;
+    }
+
+    var ref = sex==="m" ? 21 : 18;
+    var rl  = age - ref;
+    var m   = h/100;                       // рост в метрах
+    var F   = sex==="m"
+      ? (17.2 + 0.31*rl + 0.0012*rl*rl)
+      : (14.7 + 0.26*rl + 0.001*rl*rl);
+    var kss = (ot*w) / (ob*m*m*F);
+    var bv  = kss*rl + ref;
+
+    var zone, col, bgv, dot;
+    if(kss < 0.95){ zone="Замедленное старение"; col="var(--blue)"; bgv="var(--bluebg)"; dot="var(--blue)"; }
+    else if(kss <= 1.05){ zone="Нормальная скорость"; col="var(--green)"; bgv="var(--greenbg)"; dot="var(--green)"; }
+    else { zone="Ускоренное старение"; col="var(--red)"; bgv="var(--redbg)"; dot="var(--red)"; }
+
+    var diff = bv - age;
+    var deltaTxt, deltaCol;
+    if(Math.abs(diff) < 0.5){ deltaTxt="совпадает с паспортным"; deltaCol="var(--muted)"; }
+    else if(diff < 0){ deltaTxt="на "+fmt(-diff)+" "+years(-diff)+" моложе паспортного"; deltaCol="var(--green)"; }
+    else { deltaTxt="на "+fmt(diff)+" "+years(diff)+" старше паспортного"; deltaCol="var(--red)"; }
+
+    res.className = "result show";
+    res.innerHTML =
+      '<div class="zone" style="color:'+col+';background:'+bgv+'"><span class="dot" style="background:'+dot+'"></span>'+zone+'</div>'+
+      '<div class="bv">'+fmt(bv)+' <small>лет</small></div>'+
+      '<div class="delta" style="color:'+deltaCol+'">'+deltaTxt+'</div>'+
+      '<div class="metrics">'+
+        '<div class="metric"><div class="k">Скорость старения (КСС)</div><div class="v" style="color:'+col+'">'+kss.toFixed(2)+'</div></div>'+
+        '<div class="metric"><div class="k">Паспортный возраст</div><div class="v">'+Math.round(age)+' лет</div></div>'+
+      '</div>';
+  }
+
+  function fmt(x){ return (Math.round(x*10)/10).toLocaleString("ru-RU"); }
+  function years(x){
+    var n = Math.round(x), d=n%10, dd=n%100;
+    if(dd>=11&&dd<=14) return "лет";
+    if(d===1) return "год"; if(d>=2&&d<=4) return "года"; return "лет";
+  }
+})();
+</script>
+</body>
+</html>
