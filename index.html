@@ -77,7 +77,35 @@
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
   .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:18px;line-height:1.6}
   .foot a{color:var(--accent);text-decoration:none}
+  .printbtn{display:none;width:100%;margin-top:14px;padding:13px;border:1.5px solid var(--line);
+    background:#fff;border-radius:12px;font:inherit;font-weight:600;color:var(--ink);
+    cursor:pointer;transition:.15s;align-items:center;justify-content:center;gap:8px}
+  .printbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .printbtn.show{display:flex}
+  .print-meta{display:none}
   @media (max-width:420px){ .bv{font-size:44px} h1{font-size:22px} }
+
+  @media print{
+    @page{ margin:16mm }
+    body{ background:#fff; padding:0; color:#000 }
+    .wrap{ max-width:none }
+    .card{ box-shadow:none; border:none; border-radius:0; padding:0 }
+    .badge{ background:none; padding:0; color:#000 }
+    /* скрываем интерактив, ненужный на бумаге */
+    .seg, .printbtn, details, .foot a{ display:none !important }
+    /* поля ввода — как обычный текст */
+    .grid{ gap:8px }
+    .inp input{ border:none; padding:0; font-size:14px; -webkit-text-fill-color:#000; color:#000 }
+    .inp .unit{ position:static; transform:none; color:#000; margin-left:4px }
+    .inp{ display:flex; align-items:baseline }
+    label{ color:#000 }
+    .result{ opacity:1 !important; transform:none !important; border:1px solid #ccc; margin-top:14px }
+    .result .v, .result .bv, .result .delta, .result .zone{ color:#000 !important }
+    .zone{ background:none !important; border:1px solid #ccc }
+    .print-meta{ display:block; margin-top:18px; padding-top:10px; border-top:1px solid #ccc;
+      font-size:12px; color:#333; text-align:center; line-height:1.6 }
+    .foot{ margin-top:14px; color:#333 }
+  }
 </style>
 </head>
 <body>
@@ -119,6 +147,10 @@
 
       <div class="result" id="result"></div>
 
+      <button type="button" class="printbtn" id="printBtn">🖨 Печать / Сохранить в PDF</button>
+
+      <div class="print-meta" id="printMeta"></div>
+
       <details>
         <summary>Формула и интерпретация</summary>
         <div class="formula">
@@ -152,8 +184,18 @@
   });
   ids.forEach(function(id){ $(id).addEventListener("input", calc); });
 
+  $("printBtn").addEventListener("click", function(){
+    var d = new Date();
+    var sexTxt = sex==="m" ? "Мужчина" : "Женщина";
+    $("printMeta").innerHTML =
+      "Пол: "+sexTxt+" · Дата расчёта: "+d.toLocaleDateString("ru-RU")+
+      "<br>Калькулятор биологического возраста (метод Горелкина–Пинхасова)";
+    window.print();
+  });
+
   function calc(){
     var res = $("result");
+    var btn = $("printBtn");
     var age = parseFloat($("age").value),
         h   = parseFloat($("h").value),
         w   = parseFloat($("w").value),
@@ -161,10 +203,10 @@
         ob  = parseFloat($("hip").value);
 
     if([age,h,w,ot,ob].some(function(v){return isNaN(v);})){
-      res.className = "result"; res.innerHTML = ""; return;
+      res.className = "result"; res.innerHTML = ""; btn.classList.remove("show"); return;
     }
     if(h<=0||w<=0||ot<=0||ob<=0){
-      res.className="result show"; res.innerHTML='<div class="err">Проверьте значения — нужны положительные числа.</div>'; return;
+      res.className="result show"; res.innerHTML='<div class="err">Проверьте значения — нужны положительные числа.</div>'; btn.classList.remove("show"); return;
     }
 
     var ref = sex==="m" ? 21 : 18;
@@ -196,6 +238,8 @@
         '<div class="metric"><div class="k">Скорость старения (КСС)</div><div class="v" style="color:'+col+'">'+kss.toFixed(2)+'</div></div>'+
         '<div class="metric"><div class="k">Паспортный возраст</div><div class="v">'+Math.round(age)+' лет</div></div>'+
       '</div>';
+
+    btn.classList.add("show");
   }
 
   function fmt(x){ return (Math.round(x*10)/10).toLocaleString("ru-RU"); }
