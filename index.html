@@ -77,11 +77,11 @@
     font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
   .foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:18px;line-height:1.6}
   .foot a{color:var(--accent);text-decoration:none}
-  .printbtn{display:none;width:100%;margin-top:14px;padding:13px;border:1.5px solid var(--line);
+  .printbtn{display:flex;width:100%;margin-top:14px;padding:13px;border:1.5px solid var(--line);
     background:#fff;border-radius:12px;font:inherit;font-weight:600;color:var(--ink);
     cursor:pointer;transition:.15s;align-items:center;justify-content:center;gap:8px}
   .printbtn:hover{border-color:var(--accent);color:var(--accent)}
-  .printbtn.show{display:flex}
+  .printbtn:disabled{opacity:.45;cursor:not-allowed;border-color:var(--line);color:var(--muted)}
   .print-meta{display:none}
   @media (max-width:420px){ .bv{font-size:44px} h1{font-size:22px} }
 
@@ -147,7 +147,7 @@
 
       <div class="result" id="result"></div>
 
-      <button type="button" class="printbtn" id="printBtn">🖨 Печать / Сохранить в PDF</button>
+      <button type="button" class="printbtn" id="printBtn" disabled>🖨 Печать / Сохранить в PDF</button>
 
       <div class="print-meta" id="printMeta"></div>
 
@@ -203,10 +203,10 @@
         ob  = parseFloat($("hip").value);
 
     if([age,h,w,ot,ob].some(function(v){return isNaN(v);})){
-      res.className = "result"; res.innerHTML = ""; btn.classList.remove("show"); return;
+      res.className = "result"; res.innerHTML = ""; btn.disabled = true; return;
     }
     if(h<=0||w<=0||ot<=0||ob<=0){
-      res.className="result show"; res.innerHTML='<div class="err">Проверьте значения — нужны положительные числа.</div>'; btn.classList.remove("show"); return;
+      res.className="result show"; res.innerHTML='<div class="err">Проверьте значения — нужны положительные числа.</div>'; btn.disabled = true; return;
     }
 
     var ref = sex==="m" ? 21 : 18;
@@ -239,7 +239,7 @@
         '<div class="metric"><div class="k">Паспортный возраст</div><div class="v">'+Math.round(age)+' лет</div></div>'+
       '</div>';
 
-    btn.classList.add("show");
+    btn.disabled = false;
   }
 
   function fmt(x){ return (Math.round(x*10)/10).toLocaleString("ru-RU"); }
